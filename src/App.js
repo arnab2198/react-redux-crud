@@ -133,7 +133,7 @@ function App(props) {
         return head;
       }
     });
-    return modifiedHeaders;
+    return modifiedHeaders.filter(obj => obj.key !== 'id');
   }
 
   const openImageWindow = (data) => {
@@ -241,13 +241,12 @@ function App(props) {
 
   const exportToCSVFile = () => {
     const csvData = getCSVFile(allTasks);
-    console.log(csvData);
-    // let link = document.createElement('a')
-    // link.id = 'download-csv'
-    // link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csvData));
-    // link.setAttribute('download', 'tasks.csv');
-    // document.body.appendChild(link)
-    // document.querySelector('#download-csv').click()
+    let link = document.createElement('a')
+    link.id = 'download-csv'
+    link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csvData));
+    link.setAttribute('download', 'tasks.csv');
+    document.body.appendChild(link)
+    document.querySelector('#download-csv').click()
   }
 
   return (

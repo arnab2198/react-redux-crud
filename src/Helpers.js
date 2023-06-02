@@ -9,6 +9,7 @@ function uuid() {
 	const uuidNum = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 		const r = (dt + Math.random() * 16) % 16 | 0;
 		dt = Math.floor(dt / 16);
+		// eslint-disable-next-line
 		return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 	});
 	return uuidNum;
@@ -38,25 +39,45 @@ const getBase64 = (file) => {
 	});
 }
 
+const formatData = (data) => {
+	const blockValues = [null, undefined, ''];
+	if (Array.isArray(data)) {
+		data.forEach((item) => {
+			Object.keys(item).map((obj) => {
+				if (blockValues.includes(item[obj])) {
+					item[obj] = 'N/A';
+					return item;
+				}
+				return item;
+			})
+			return item;
+		})
+	}
+	return data;
+}
+
 const getCSVFile = (items = []) => {
 	if (!items) return;
-	const blockedTypes = [undefined, null, ''];
 	let csv = ''
-	// const newItems = headers.map((head) => { if (head.exportCSV) return head.key }).filter(hD => typeof hD !== 'undefined');
+	// eslint-disable-next-line
+	const csvExportFields = headers.map((head) => { if (head.exportCSV) return head.key }).filter(hD => typeof hD !== 'undefined');
 	if (Array.isArray(items)) {
-		for (let row = 0; row < items.length; row++) {
-			let keysAmount = Object.keys(items[row]).length
+		const newItems = formatData(items);
+		for (let row = 0; row < newItems.length; row++) {
+			let keysAmount = Object.keys(newItems[row]).length
 			let keysCounter = 0
 			if (row === 0) {
-				for (let key in items[row]) {
-					csv += key + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
+				for (let key in newItems[row]) {
+					if (csvExportFields.includes(key)) {
+						csv += key + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
+					}
 					keysCounter++
 				}
 			} else {
-				for (let key in items[row]) {
-					console.log('typeof items[row][key]', items[row]);
-					const value = blockedTypes.includes(typeof items[row][key]) ? 'N/A' : items[row][key]
-					csv += value + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
+				for (let key in newItems[row]) {
+					if (csvExportFields.includes(key)) {
+						csv += newItems[row][key] + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
+					}
 					keysCounter++
 				}
 			}

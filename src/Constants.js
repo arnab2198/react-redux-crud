@@ -38,14 +38,15 @@ export const STATUS_LIST = [
 ]
 
 export const headers = [
+    { key: 'id', label: 'ID', isSort: true, exportCSV: true },
     { key: 'image', label: 'Image', isSort: false, exportCSV: false },
     {
         key: 'task_name', label: 'Name', isSort: true, isSearchable: true, exportCSV: true,
-        render: (item) => item.task_name.length > 30 ? item.task_name.substring(0, 30) + '...' : item.task_name
+        render: (item) => item.task_name && item.task_name.length > 30 ? item.task_name.substring(0, 30) + '...' : item.task_name
     },
     {
         key: 'task_description', label: 'Description', isSort: true, isSearchable: true, exportCSV: true,
-        render: (item) => item.task_description.length > 30 ? item.task_description.substring(0, 30) + '...' : item.task_description
+        render: (item) => item.task_description && item.task_description.length > 30 ? item.task_description.substring(0, 30) + '...' : item.task_description
     },
     { key: 'start_date', label: 'Start Date', render: (item) => moment(item.start_date).format('DD-MM-YYYY'), isSort: true, exportCSV: true },
     { key: 'end_date', label: 'End Date', render: (item) => moment(item.end_date).format('DD-MM-YYYY'), isSort: true, exportCSV: true },

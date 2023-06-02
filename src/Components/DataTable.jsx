@@ -114,11 +114,11 @@ const DataTable = (props) => {
                 </Box>
             }
 
-            {/* <Box className='exportCSVContainer'>
+            <Box className='exportCSVContainer'>
                 {typeof exportToCSV === 'function' &&
                     <Button variant='contained' onClick={exportToCSV}>Export CSV</Button>
                 }
-            </Box> */}
+            </Box>
 
             <TableContainer className='tableContainer'>
                 <Table>
