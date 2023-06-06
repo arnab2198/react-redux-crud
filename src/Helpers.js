@@ -1,5 +1,4 @@
 import { get, map } from 'lodash';
-import { headers } from './Constants';
 
 const GetValue = get;
 const Map = map;
@@ -39,52 +38,39 @@ const getBase64 = (file) => {
 	});
 }
 
-const formatData = (data) => {
-	const blockValues = [null, undefined, ''];
-	if (Array.isArray(data)) {
-		data.forEach((item) => {
-			Object.keys(item).map((obj) => {
-				if (blockValues.includes(item[obj])) {
-					item[obj] = 'N/A';
-					return item;
-				}
-				return item;
-			})
-			return item;
-		})
-	}
-	return data;
-}
+function getCSVFile(args, customExportFields, customKeys, customDataManage) {
+	let result = '';
+	let ctr = '';
+	let keys = '';
+	let columnDelimiter = '';
+	let lineDelimiter = '';
+	let data = '';
 
-const getCSVFile = (items = []) => {
-	if (!items) return;
-	let csv = ''
-	// eslint-disable-next-line
-	const csvExportFields = headers.map((head) => { if (head.exportCSV) return head.key }).filter(hD => typeof hD !== 'undefined');
-	if (Array.isArray(items)) {
-		const newItems = formatData(items);
-		for (let row = 0; row < newItems.length; row++) {
-			let keysAmount = Object.keys(newItems[row]).length
-			let keysCounter = 0
-			if (row === 0) {
-				for (let key in newItems[row]) {
-					if (csvExportFields.includes(key)) {
-						csv += key + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
-					}
-					keysCounter++
-				}
-			} else {
-				for (let key in newItems[row]) {
-					if (csvExportFields.includes(key)) {
-						csv += newItems[row][key] + (keysCounter + 1 < keysAmount ? ',' : '\r\n')
-					}
-					keysCounter++
-				}
-			}
-			keysCounter = 0
-		}
+
+	data = args.data || null;
+	if (data == null || !data.length) {
+		return null;
 	}
-	return csv;
+
+	columnDelimiter = args.columnDelimiter || ',';
+	lineDelimiter = args.lineDelimiter || '\n';
+	keys = customExportFields;
+	result = '';
+	result += customKeys;
+	result += lineDelimiter;
+	data.forEach(function (item, dtIndex) {
+		ctr = 0;
+		keys.forEach(function (key) {
+			if (ctr > 0) {
+				result += columnDelimiter;
+			}
+			result = customDataManage(item, key, dtIndex, result)
+			ctr++;
+		});
+		result += lineDelimiter;
+	});
+
+	return result;
 }
 
 export { GetValue, uuid, Map, trimValue, getBase64, getCSVFile };

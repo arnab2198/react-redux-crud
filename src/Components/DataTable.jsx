@@ -1,4 +1,4 @@
-import { Button, IconButton, InputAdornment, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, TextField } from '@mui/material'
+import { Button, Checkbox, IconButton, InputAdornment, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, TextField, Tooltip, Typography } from '@mui/material'
 import { Box } from '@mui/system'
 import React, { Fragment, useEffect, useState } from 'react'
 import { GetValue, Map } from '../Helpers';
@@ -7,7 +7,7 @@ import { DATATABLE_ROWS_OPTIONS } from '../Constants';
 
 
 const DataTable = (props) => {
-    const { items, headers, actions, onActionClick, canSearch = false, canFilter = false, filters, exportToCSV } = props;
+    const { items, headers, actions, onActionClick, canSearch = false, canFilter = false, filters, exportToCSV, handleCheckboxSelect, checkedTasks } = props;
 
     const [state, setState] = useState({
         data: [],
@@ -116,7 +116,11 @@ const DataTable = (props) => {
 
             <Box className='exportCSVContainer'>
                 {typeof exportToCSV === 'function' &&
-                    <Button variant='contained' onClick={exportToCSV}>Export CSV</Button>
+                    <Tooltip title={checkedTasks.length < 1 ? <Typography fontSize={10}>No task to export</Typography> : ''} arrow placement="left">
+                        <span>
+                            <Button variant='contained' disabled={checkedTasks.length < 1 ? true : false} onClick={exportToCSV}>Export CSV</Button>
+                        </span>
+                    </Tooltip>
                 }
             </Box>
 
@@ -124,30 +128,55 @@ const DataTable = (props) => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            {headers && Map(headers, (head, headIndex) => (
-                                <TableCell className='tableHead' key={headIndex}>
-                                    {head.isSort ?
-                                        <TableSortLabel direction={order} onClick={() => sortHandler(head)}>
-                                            {head.label}
-                                        </TableSortLabel>
-                                        :
-                                        head.label
-                                    }
+                            <Tooltip title='Select All' arrow placement="top">
+                                <TableCell>
+                                    <span>
+                                        <Checkbox
+                                            onChange={(event) => handleCheckboxSelect(event, null)}
+                                            name='select-all'
+                                            disabled={data.length < 1}
+                                            checked={checkedTasks.length === data.length}
+                                        />
+                                    </span>
                                 </TableCell>
+                            </Tooltip>
+                            {headers && Map(headers, (head, headIndex) => (
+                                <Fragment key={headIndex}>
+                                    <TableCell>
+                                        {head.isSort ?
+                                            <TableSortLabel direction={order} onClick={() => sortHandler(head)}>
+                                                {head.label}
+                                            </TableSortLabel>
+                                            :
+                                            head.label
+                                        }
+                                    </TableCell>
+                                </Fragment>
                             ))}
                             {actions && actions.length > 0 &&
                                 <TableCell className='tableHead'>
                                     Action
-                                </TableCell>}
+                                </TableCell>
+                            }
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data && data.length > 0 ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, itemIndex) => (
                             <TableRow key={itemIndex}>
+                                <TableCell>
+                                    <Checkbox
+                                        onChange={(event) => handleCheckboxSelect(event, item)}
+                                        name={`item-${itemIndex}`}
+                                        disabled={data.length < 1}
+                                        checked={checkedTasks.findIndex((task) => task.id === item.id) > -1}
+                                    />
+                                </TableCell>
                                 {headers && Map(headers, (head, headIndex) => (
-                                    <TableCell key={headIndex}>
-                                        {head.render ? head.render(item) : GetValue(item, head.key)}
-                                    </TableCell>
+                                    <Fragment key={headIndex}>
+                                        <TableCell>
+                                            {head.render ? head.render(item, itemIndex) : GetValue(item, head.key)}
+                                        </TableCell>
+                                    </Fragment>
                                 ))}
                                 {actions && actions.length > 0 &&
                                     <TableCell>
@@ -161,7 +190,7 @@ const DataTable = (props) => {
                             </TableRow>
                         )) : (
                             <TableRow>
-                                <TableCell sx={{ padding: '100px', textAlign: 'center' }} colSpan={8}>
+                                <TableCell sx={{ padding: '100px', textAlign: 'center' }} colSpan={11}>
                                     No Task Found
                                 </TableCell>
                             </TableRow>)

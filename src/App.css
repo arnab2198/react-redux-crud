@@ -192,3 +192,7 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   margin-bottom: 20px;
 }
+
+.PrivateSwitchBase-root {
+  padding: 0 !important;
+}

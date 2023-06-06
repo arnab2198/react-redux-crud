@@ -38,7 +38,7 @@ export const STATUS_LIST = [
 ]
 
 export const headers = [
-    { key: 'id', label: 'ID', isSort: true, exportCSV: true },
+    { key: 'sr_no', label: 'Sr. No', isSort: true, exportCSV: true, render: (item, index) => index + 1 },
     { key: 'image', label: 'Image', isSort: false, exportCSV: false },
     {
         key: 'task_name', label: 'Name', isSort: true, isSearchable: true, exportCSV: true,
@@ -52,8 +52,8 @@ export const headers = [
     { key: 'end_date', label: 'End Date', render: (item) => moment(item.end_date).format('DD-MM-YYYY'), isSort: true, exportCSV: true },
     { key: 'priority.name', label: 'Priority', isSort: true, isSearchable: true, exportCSV: true },
     { key: 'status.name', label: 'Status', isSort: true, isSearchable: true, exportCSV: true },
-    { key: 'created_at', label: 'Created At', render: (item) => moment(item.created_at).format('DD-MM-YYYY HH:mm:ss'), isSort: true, exportCSV: true },
-    { key: 'updated_at', label: 'Last Updated', render: (item) => item.updated_at ? moment(item.updated_at).format('DD-MM-YYYY HH:mm:ss') : 'N/A', isSort: true, exportCSV: true },
+    { key: 'created_at', label: 'Created At', render: (item) => moment(item.created_at).format('DD-MM-YYYY HH:mm:ss'), isSort: true, exportCSV: false },
+    { key: 'updated_at', label: 'Last Updated', render: (item) => item.updated_at ? moment(item.updated_at).format('DD-MM-YYYY HH:mm:ss') : 'N/A', isSort: true, exportCSV: false },
 ];
 
 export const actions = [

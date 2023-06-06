@@ -32,10 +32,13 @@ function App(props) {
     priorityFilterValue: '',
     statusFilterValue: '',
     imageWindowOpen: false,
-    showImage: ''
+    showImage: '',
+    checkedTasks: []
   })
 
-  const { open, allTasks, selectedTask, isEditing, isViewing, isDeleting, priorityFilterValue, statusFilterValue, imageWindowOpen, showImage } = state;
+  const { open, allTasks, selectedTask, isEditing, isViewing, isDeleting, priorityFilterValue, statusFilterValue, imageWindowOpen, showImage,
+    checkedTasks
+  } = state;
 
   useEffect(() => {
     if (JSON.stringify(allTasks) !== JSON.stringify(tasks))
@@ -133,7 +136,7 @@ function App(props) {
         return head;
       }
     });
-    return modifiedHeaders.filter(obj => obj.key !== 'id');
+    return modifiedHeaders;
   }
 
   const openImageWindow = (data) => {
@@ -239,14 +242,50 @@ function App(props) {
     }
   }
 
+  const manageCustomCsvData = (item, key, dataIndex, result) => {
+    const blockedValues = [undefined, null, ''];
+    let newKey = key.includes('.') ? key.split('.')[0] : key;
+    if (newKey === 'sr_no')
+      result += dataIndex + 1
+    else if (newKey === 'start_date' || newKey === 'end_date')
+      result += moment(item[newKey]).format('DD-MM-YYYY')
+    else
+      result += blockedValues.includes(item[newKey]) ? 'N/A' : (typeof item[newKey] === 'object' ? item[newKey]['name'] : item[newKey]);
+    return result;
+  }
+
   const exportToCSVFile = () => {
-    const csvData = getCSVFile(allTasks);
+    let csvData = '';
+    const customKeys = ['Sr. No', 'Task Name', 'Task Description', 'Start Date', 'End date', 'Priority', 'Status'];
+    // eslint-disable-next-line
+    const exportCSVFields = headers.map((head) => { if (head.exportCSV) return head.key }).filter(hD => typeof hD !== 'undefined')
+    csvData = getCSVFile({ data: checkedTasks }, exportCSVFields, customKeys, manageCustomCsvData);
     let link = document.createElement('a')
     link.id = 'download-csv'
-    link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csvData));
-    link.setAttribute('download', 'tasks.csv');
+    link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURI(csvData));
+    link.setAttribute('download', `${Date.now()}_tasks.csv`);
     document.body.appendChild(link)
     document.querySelector('#download-csv').click()
+    setToast('CSV exported successfully');
+  }
+
+  const checkboxSelect = (e, data) => {
+    const { name, checked } = e.target;
+    let checkedTask = [];
+    checkedTask = [...checkedTasks];
+    if (name === 'select-all') {
+      if (checked) checkedTask = allTasks;
+      else checkedTask = [];
+    } else {
+      const index = checkedTask.findIndex((task) => task.id === data.id);
+
+      if (index > -1) {
+        checkedTask.splice(index, 1);
+      } else {
+        checkedTask.push(data);
+      }
+    }
+    setState((prev) => ({ ...prev, checkedTasks: checkedTask }));
   }
 
   return (
@@ -266,6 +305,8 @@ function App(props) {
         canFilter
         filters={modifiedFilters}
         exportToCSV={exportToCSVFile}
+        handleCheckboxSelect={checkboxSelect}
+        checkedTasks={checkedTasks}
       />
 
       {open && <TaskDialog open={open} onClose={() => handleToggleDialog('CREATE')} onSubmit={handleSubmit} />}
