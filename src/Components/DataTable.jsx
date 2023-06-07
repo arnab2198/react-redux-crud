@@ -135,7 +135,7 @@ const DataTable = (props) => {
                                             onChange={(event) => handleCheckboxSelect(event, null)}
                                             name='select-all'
                                             disabled={data.length < 1}
-                                            checked={checkedTasks.length === data.length}
+                                            checked={data.length > 0 && checkedTasks.length === data.length}
                                         />
                                     </span>
                                 </TableCell>
@@ -190,7 +190,7 @@ const DataTable = (props) => {
                             </TableRow>
                         )) : (
                             <TableRow>
-                                <TableCell sx={{ padding: '100px', textAlign: 'center' }} colSpan={11}>
+                                <TableCell sx={{ padding: '100px', textAlign: 'center' }} colSpan={12}>
                                     No Task Found
                                 </TableCell>
                             </TableRow>)

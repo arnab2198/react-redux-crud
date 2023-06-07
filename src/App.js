@@ -267,6 +267,7 @@ function App(props) {
     document.body.appendChild(link)
     document.querySelector('#download-csv').click()
     setToast('CSV exported successfully');
+    document.body.removeChild(link);
   }
 
   const checkboxSelect = (e, data) => {
