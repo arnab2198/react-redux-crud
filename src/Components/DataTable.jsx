@@ -7,7 +7,8 @@ import { DATATABLE_ROWS_OPTIONS } from '../Constants';
 
 
 const DataTable = (props) => {
-    const { items, headers, actions, onActionClick, canSearch = false, canFilter = false, filters, exportToCSV, handleCheckboxSelect, checkedTasks } = props;
+    const { items, headers, actions, onActionClick, canSearch = false, canFilter = false, filters, exportToCSV, handleCheckboxSelect,
+        checkedTasks, canExportCsv, canImportCsv, importCSV } = props;
 
     const [state, setState] = useState({
         data: [],
@@ -114,13 +115,29 @@ const DataTable = (props) => {
                 </Box>
             }
 
-            <Box className='exportCSVContainer'>
-                {typeof exportToCSV === 'function' &&
-                    <Tooltip title={checkedTasks.length < 1 ? <Typography fontSize={10}>No task to export</Typography> : ''} arrow placement="left">
-                        <span>
-                            <Button variant='contained' disabled={checkedTasks.length < 1 ? true : false} onClick={exportToCSV}>Export CSV</Button>
-                        </span>
-                    </Tooltip>
+            <Box className="csvButtonBox">
+                {canExportCsv &&
+                    <Box className='exportCSVContainer'>
+                        {typeof exportToCSV === 'function' &&
+                            <Tooltip title={checkedTasks.length < 1 ? <Typography fontSize={10}>Select task to export</Typography> : ''} arrow placement="left">
+                                <span>
+                                    <Button variant='contained' disabled={checkedTasks.length < 1 ? true : false} onClick={exportToCSV}>Export CSV</Button>
+                                </span>
+                            </Tooltip>
+                        }
+                    </Box>
+                }
+
+                {canImportCsv &&
+                    <Box className='exportCSVContainer'>
+                        {canExportCsv && typeof importCSV === 'function' &&
+                            <Tooltip title={<Typography fontSize={10}>Upload CSV of task</Typography>} arrow placement="left">
+                                <span>
+                                    <Button variant='contained' onClick={importCSV}>Import CSV</Button>
+                                </span>
+                            </Tooltip>
+                        }
+                    </Box>
                 }
             </Box>
 

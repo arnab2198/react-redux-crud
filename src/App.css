@@ -196,3 +196,10 @@ body::-webkit-scrollbar-thumb {
 .PrivateSwitchBase-root {
   padding: 0 !important;
 }
+
+.csvButtonBox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}

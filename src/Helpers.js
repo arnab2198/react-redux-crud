@@ -38,14 +38,13 @@ const getBase64 = (file) => {
 	});
 }
 
-function getCSVFile(args, customExportFields, customKeys, customDataManage) {
+const getCSVFile = (args, customExportFields, customKeys, customDataManage) => {
 	let result = '';
 	let ctr = '';
 	let keys = '';
 	let columnDelimiter = '';
 	let lineDelimiter = '';
 	let data = '';
-
 
 	data = args.data || null;
 	if (data == null || !data.length) {
@@ -73,4 +72,52 @@ function getCSVFile(args, customExportFields, customKeys, customDataManage) {
 	return result;
 }
 
-export { GetValue, uuid, Map, trimValue, getBase64, getCSVFile };
+const importCSVFile = (file, func) => {
+	let newJSON = [];
+	const blockedData = [undefined, null, '', ' '];
+	const acceptedHeaders = [
+		{ key: 'Sr. No', name: 'sr_no' },
+		{ key: 'Task Name', name: 'task_name' },
+		{ key: 'Task Description', name: 'task_description' },
+		{ key: 'Start Date', name: 'start_date' },
+		{ key: 'End date', name: 'end_date' },
+		{ key: 'Priority', name: 'priority' },
+		{ key: 'Status', name: 'status' }
+	]
+	const reader = new FileReader();
+	let text;
+	reader.onload = function (e) {
+		text = e.target.result;
+		let arr = text.split('\n');
+		let jsonObj = [];
+		let headers = arr[0].split(',');
+		for (let i = 1; i < arr.length; i++) {
+			let data = arr[i].split(',').filter((tex) => !blockedData.includes(tex));
+			let obj = {};
+			for (let j = 0; j < data.length; j++) {
+				obj[headers[j].trim()] = data[j].trim();
+			}
+
+			jsonObj.push(obj);
+		}
+
+		const isAllHeadMatched = acceptedHeaders.every((head) => headers.includes(head.key));
+
+		newJSON = jsonObj.filter((obj) => Object.keys(obj).length > 1);
+
+		if (isAllHeadMatched) {
+			newJSON.map((obj) => {
+				acceptedHeaders.forEach((head) => {
+					obj.id = uuid();
+					obj[head.name] = obj[head.key];
+					delete obj[head.key];
+				})
+				return obj;
+			})
+		}
+		func(newJSON);
+	}
+	reader.readAsText(file);
+}
+
+export { GetValue, uuid, Map, trimValue, getBase64, getCSVFile, importCSVFile };

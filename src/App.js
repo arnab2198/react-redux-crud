@@ -3,7 +3,7 @@ import { Fab, IconButton, InputAdornment, Tooltip } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { Fragment, useEffect, useState } from 'react';
 import TaskDialog from './Components/TaskDialog';
-import { Map, getCSVFile, uuid } from './Helpers';
+import { Map, getCSVFile, importCSVFile, uuid } from './Helpers';
 import { CreateTask, DeleteTask, UpdateTask } from './Redux/Actions';
 import { connect } from 'react-redux';
 import DataTable from './Components/DataTable';
@@ -33,7 +33,7 @@ function App(props) {
     statusFilterValue: '',
     imageWindowOpen: false,
     showImage: '',
-    checkedTasks: []
+    checkedTasks: [],
   })
 
   const { open, allTasks, selectedTask, isEditing, isViewing, isDeleting, priorityFilterValue, statusFilterValue, imageWindowOpen, showImage,
@@ -289,6 +289,64 @@ function App(props) {
     setState((prev) => ({ ...prev, checkedTasks: checkedTask }));
   }
 
+  const importCSV = () => {
+    const element = document.createElement('input');
+    element.type = 'file';
+    element.accept = 'text/csv';
+    element.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type === 'text/csv') {
+        importCSVFile(file, getCSVdata);
+      } else {
+        setToast('File must be CSV / XLSX', 'error')
+      }
+    });
+    element.click();
+  }
+
+  const getCSVdata = (data) => {
+    if (data && Array.isArray(data) && data.length > 0) {
+      allTasks.forEach((task) => {
+        data = data.filter((objData) =>
+          objData.task_name !== task.task_name
+          && objData.task_description !== task.task_description
+        )
+      })
+    }
+
+    data = data.map((newObj) => {
+      const priority = PRIORITY_LIST.find((prioRty) => prioRty.value === newObj['priority'].split(' ').join('_').toUpperCase());
+      let newPriority = {};
+      Object.assign(newPriority, priority);
+
+      newPriority['name'] = newPriority['label'];
+      delete newPriority['key'];
+      delete newPriority['label'];
+
+      const status = STATUS_LIST.find((sttS) => sttS.value === newObj['status'].split(' ').join('_').toUpperCase());
+      let newStatus = {};
+      Object.assign(newStatus, status);
+
+      newStatus['name'] = newStatus['label'];
+      delete newStatus['key'];
+      delete newStatus['label'];
+
+      newObj['created_at'] = moment(Date.now()).format();
+      newObj['updated_at'] = null;
+      newObj['image'] = null;
+      newObj['priority'] = newPriority;
+      newObj['status'] = newStatus;
+      delete newObj['sr_no'];
+      return newObj;
+    })
+
+    if (data.length > 0) {
+      let allTasksArr = [...allTasks, ...data];
+      dispatch(CreateTask(allTasksArr));
+      setToast('CSV imported successfully');
+    } else setToast('Nothing to import from CSV', 'error');
+  }
+
   return (
     <div className="App">
       <Tooltip title="Add Task" placement='top' arrow>
@@ -304,10 +362,13 @@ function App(props) {
         onActionClick={onActionClick}
         canSearch
         canFilter
+        canExportCsv
+        canImportCsv
         filters={modifiedFilters}
         exportToCSV={exportToCSVFile}
         handleCheckboxSelect={checkboxSelect}
         checkedTasks={checkedTasks}
+        importCSV={importCSV}
       />
 
       {open && <TaskDialog open={open} onClose={() => handleToggleDialog('CREATE')} onSubmit={handleSubmit} />}
